@@ -6,7 +6,7 @@ namespace PentominoesLib
 {
     public class Variation
     {
-        public Variation(Orientation orientation, Boolean reflected, IEnumerable<Coords> coords)
+        public Variation(Orientation orientation, bool reflected, IEnumerable<Coords> coords)
         {
             Orientation = orientation;
             Reflected = reflected;
@@ -14,7 +14,7 @@ namespace PentominoesLib
         }
 
         public readonly Orientation Orientation;
-        public readonly Boolean Reflected;
+        public readonly bool Reflected;
         public readonly IEnumerable<Coords> Coords;
     }
 }

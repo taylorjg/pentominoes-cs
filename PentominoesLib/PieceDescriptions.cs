@@ -6,7 +6,7 @@ namespace PentominoesLib
 {
     public static class PieceDescriptions
     {
-        public static IEnumerable<PieceDescription> ThePieceDescriptions = new[] {
+        public static IEnumerable<PieceDescription> AllPieceDescriptions = new[] {
             new PieceDescription("F", new[]{
                 " XX",
                 "XX ",
