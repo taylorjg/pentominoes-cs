@@ -8,11 +8,16 @@ namespace PentominoesLib
 {
     public static class Pentominoes
     {
-        public static IEnumerable<Solution> Solve()
+        public static IEnumerable<Solution> Solve(Action<IEnumerable<Placement>, Solution, int> onSolutionFound)
         {
             var rows = BuildRows;
             var matrix = BuildMatrix(rows);
             var dlx = new Dlx();
+            dlx.SolutionFound += (_, e) =>
+            {
+                if (onSolutionFound != null)
+                    onSolutionFound(rows, e.Solution, e.SolutionIndex);
+            };
             return dlx.Solve(matrix, d => d, r => r);
         }
 

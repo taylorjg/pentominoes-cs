@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PentominoesLib
 {
-    public static class Manipulations
+    public static class StringManipulations
     {
         public static IEnumerable<string> RotateStrings(IEnumerable<string> strings)
         {

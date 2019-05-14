@@ -10,7 +10,7 @@ namespace PentominoesTests
         [Fact]
         public void FindsCorrectNumberOfSolutions()
         {
-            var solutions = Pentominoes.Solve();
+            var solutions = Pentominoes.Solve(null);
             Assert.Equal(520, solutions.Count());
         }
     }

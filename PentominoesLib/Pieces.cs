@@ -12,13 +12,13 @@ namespace PentominoesLib
         private static Piece MakePiece(PieceDescription pieceDescription)
         {
             var northPattern = pieceDescription.Pattern;
-            var westPattern = Manipulations.RotateStrings(northPattern);
-            var southPattern = Manipulations.RotateStrings(westPattern);
-            var eastPattern = Manipulations.RotateStrings(southPattern);
-            var northReflectedPattern = Manipulations.ReflectStrings(northPattern);
-            var westReflectedPattern = Manipulations.ReflectStrings(westPattern);
-            var southReflectedPattern = Manipulations.ReflectStrings(southPattern);
-            var eastReflectedPattern = Manipulations.ReflectStrings(eastPattern);
+            var westPattern = StringManipulations.RotateStrings(northPattern);
+            var southPattern = StringManipulations.RotateStrings(westPattern);
+            var eastPattern = StringManipulations.RotateStrings(southPattern);
+            var northReflectedPattern = StringManipulations.ReflectStrings(northPattern);
+            var westReflectedPattern = StringManipulations.ReflectStrings(westPattern);
+            var southReflectedPattern = StringManipulations.ReflectStrings(southPattern);
+            var eastReflectedPattern = StringManipulations.ReflectStrings(eastPattern);
             var allPatternVariations = new[] {
                 new PatternVariation(Orientation.North, false, northPattern),
                 new PatternVariation(Orientation.West, false, westPattern),
