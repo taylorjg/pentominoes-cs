@@ -11,7 +11,7 @@ namespace PentominoesTests
         public void FindsCorrectNumberOfSolutions()
         {
             var solutions = Pentominoes.Solve();
-            Assert.Equal(3, solutions.Count());
+            Assert.Equal(520, solutions.Count());
         }
     }
 }
