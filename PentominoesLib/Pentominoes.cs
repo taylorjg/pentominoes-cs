@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using DlxLib;
 
@@ -7,17 +8,43 @@ namespace PentominoesLib
 {
     public static class Pentominoes
     {
-        public static ImmutableArray<ImmutableArray<Placement>> Solve(Action<ImmutableArray<Placement>> onSolutionFound)
+        public static ImmutableArray<ImmutableArray<Placement>> Solve()
         {
+            var solutionDeDuplicator = new SolutionDeDuplicator();
             var rows = BuildRows;
             var matrix = BuildMatrix(rows);
             var dlx = new Dlx();
-            if (onSolutionFound != null)
+            foreach (var solution in dlx.Solve(matrix, d => d, r => r))
             {
-                dlx.SolutionFound += (_, e) => onSolutionFound(ResolveSolution(rows, e.Solution));
+                var placements = ResolveSolution(rows, solution);
+                if (solutionDeDuplicator.SolutionIsUnique(placements))
+                {
+                    solutionDeDuplicator.Add(placements);
+                }
             }
-            var solutions = dlx.Solve(matrix, d => d, r => r).Select(solution => ResolveSolution(rows, solution));
-            return solutions.ToImmutableArray();
+            return solutionDeDuplicator.GetUniqueSolutions();
+        }
+
+        public static ImmutableArray<string> FormatSolution(ImmutableArray<Placement> solution)
+        {
+            var seed = ImmutableList.Create<(int x, int y, string label)>(
+                (3, 3, " "),
+                (3, 4, " "),
+                (4, 3, " "),
+                (4, 4, " ")
+            );
+            var cells = solution.Aggregate(seed, (accOuter, placement) =>
+                placement.Variation.Coords.Aggregate(accOuter, (accInner, coords) =>
+                {
+                    var x = placement.Location.X + coords.X;
+                    var y = placement.Location.Y + coords.Y;
+                    return accInner.Add((x, y, placement.Piece.Label));
+                }));
+            var lines =
+                from y in Enumerable.Range(0, 8)
+                let row = Enumerable.Range(0, 8).Select(x => cells.First(t => t.x == x && t.y == y))
+                select string.Join("", row.Select(t => t.label));
+            return lines.ToImmutableArray();
         }
 
         private static ImmutableArray<Placement> ResolveSolution(ImmutableArray<Placement> rows, Solution solution)
