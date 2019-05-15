@@ -1,25 +1,28 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace PentominoesLib
 {
     public static class StringManipulations
     {
-        public static IEnumerable<string> RotateStrings(IEnumerable<string> strings)
+        public static ImmutableArray<string> RotateStrings(ImmutableArray<string> strings)
         {
-            var stringsList = strings.ToList();
-            var reversedStrings = ReflectStrings(strings).ToArray();
-            var w = stringsList[0].Length;
-            var h = stringsList.Count;
+            var reversedStrings = ReflectStrings(strings);
+            var w = reversedStrings[0].Length;
+            var h = reversedStrings.Length;
             var xs = Enumerable.Range(0, w);
             var ys = Enumerable.Range(0, h);
-            return xs.Select(x => new string(ys.Select(y => reversedStrings[y][x]).ToArray()));
+            return xs
+                .Select(x => new string(ys.Select(y => reversedStrings[y][x]).ToArray()))
+                .ToImmutableArray();
         }
 
-        public static IEnumerable<string> ReflectStrings(IEnumerable<string> strings)
+        public static ImmutableArray<string> ReflectStrings(ImmutableArray<string> strings)
         {
-            return strings.Select(s => new string(s.ToArray().Reverse().ToArray()));
+            return strings
+                .Select(s => new string(s.ToCharArray().Reverse().ToArray()))
+                .ToImmutableArray();
         }
     }
 }

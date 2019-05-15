@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace PentominoesLib
 {
     public static class Pieces
     {
-        public static IEnumerable<Piece> AllPieces =
-            PieceDescriptions.AllPieceDescriptions.Select(MakePiece);
+        public static ImmutableList<Piece> AllPieces =
+            PieceDescriptions.AllPieceDescriptions
+                .Select(MakePiece)
+                .ToImmutableList();
 
         private static Piece MakePiece(PieceDescription pieceDescription)
         {
@@ -30,27 +33,29 @@ namespace PentominoesLib
                 new PatternVariation(Orientation.East, true, eastReflectedPattern)
             };
             var uniquePatternVariations = allPatternVariations.Distinct(new PatternVariationComparer());
-            var uniqueVariations = uniquePatternVariations.Select(upv =>
-                new Variation(upv.Orientation, upv.Reflected, PatternToCoords(upv.Pattern)));
+            var uniqueVariations = uniquePatternVariations
+                .Select(upv =>
+                    new Variation(upv.Orientation, upv.Reflected, PatternToCoords(upv.Pattern)))
+                .ToImmutableArray();
             return new Piece(pieceDescription.Label, uniqueVariations);
         }
 
-        private static IEnumerable<Coords> PatternToCoords(IEnumerable<string> pattern)
+        private static ImmutableArray<Coords> PatternToCoords(ImmutableArray<string> pattern)
         {
-            var patternList = pattern.ToList();
-            var xs = Enumerable.Range(0, patternList[0].Length);
-            var ys = Enumerable.Range(0, patternList.Count);
-            return
+            var xs = Enumerable.Range(0, pattern[0].Length);
+            var ys = Enumerable.Range(0, pattern.Length);
+            var coords =
                 from x in xs
                 from y in ys
-                where patternList[y][x] == 'X'
+                where pattern[y][x] == 'X'
                 select new Coords(x, y);
+            return coords.ToImmutableArray();
         }
     }
 
     class PatternVariation
     {
-        public PatternVariation(Orientation orientation, Boolean reflected, IEnumerable<string> pattern)
+        public PatternVariation(Orientation orientation, Boolean reflected, ImmutableArray<string> pattern)
         {
             Orientation = orientation;
             Reflected = reflected;
@@ -59,7 +64,7 @@ namespace PentominoesLib
 
         public readonly Orientation Orientation;
         public readonly Boolean Reflected;
-        public readonly IEnumerable<string> Pattern;
+        public readonly ImmutableArray<string> Pattern;
     }
 
     class PatternVariationComparer : IEqualityComparer<PatternVariation>

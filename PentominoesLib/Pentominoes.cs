@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using DlxLib;
 
@@ -8,7 +7,7 @@ namespace PentominoesLib
 {
     public static class Pentominoes
     {
-        public static IEnumerable<Solution> Solve(Action<IEnumerable<Placement>, Solution, int> onSolutionFound)
+        public static ImmutableArray<Solution> Solve(Action<ImmutableArray<Placement>, Solution, int> onSolutionFound)
         {
             var rows = BuildRows;
             var matrix = BuildMatrix(rows);
@@ -16,9 +15,12 @@ namespace PentominoesLib
             dlx.SolutionFound += (_, e) =>
             {
                 if (onSolutionFound != null)
+                {
                     onSolutionFound(rows, e.Solution, e.SolutionIndex);
+                }
             };
-            return dlx.Solve(matrix, d => d, r => r);
+            var solutions = dlx.Solve(matrix, d => d, r => r);
+            return solutions.ToImmutableArray();
         }
 
         private static bool PlacementIsValid(Placement placement)
@@ -33,28 +35,33 @@ namespace PentominoesLib
             return true;
         }
 
-        private static IEnumerable<Coords> AllLocations =>
-            from x in Enumerable.Range(0, 8)
-            from y in Enumerable.Range(0, 8)
-            select new Coords(x, y);
+        private static ImmutableArray<Coords> AllLocations =>
+            (
+                from x in Enumerable.Range(0, 8)
+                from y in Enumerable.Range(0, 8)
+                select new Coords(x, y)
+            ).ToImmutableArray();
 
-        private static IEnumerable<Placement> AllPlacements =>
-            from piece in Pieces.AllPieces
-            from varation in piece.Variations
-            from location in AllLocations
-            select new Placement(piece, varation, location);
+        private static ImmutableArray<Placement> AllPlacements =>
+            (
+                from piece in Pieces.AllPieces
+                from varation in piece.Variations
+                from location in AllLocations
+                select new Placement(piece, varation, location)
+            ).ToImmutableArray();
 
-        private static IEnumerable<Placement> BuildRows =>
-            AllPlacements.Where(PlacementIsValid);
+        private static ImmutableArray<Placement> BuildRows =>
+            AllPlacements.Where(PlacementIsValid).ToImmutableArray();
 
-        private static IEnumerable<int> MakePieceColumns(Placement placement)
+        private static ImmutableArray<int> MakePieceColumns(Placement placement)
         {
-            var piecesList = Pieces.AllPieces.ToList();
-            var pieceIndex = piecesList.FindIndex(piece => piece.Label == placement.Piece.Label);
-            return Enumerable.Range(0, piecesList.Count).Select(index => index == pieceIndex ? 1 : 0);
+            var pieceIndex = Pieces.AllPieces.FindIndex(piece => piece.Equals(placement.Piece));
+            return Enumerable.Range(0, Pieces.AllPieces.Count)
+                .Select(index => index == pieceIndex ? 1 : 0)
+                .ToImmutableArray();
         }
 
-        private static IEnumerable<int> MakeLocationColumns(Placement placement)
+        private static ImmutableArray<int> MakeLocationColumns(Placement placement)
         {
             var locationIndices = placement.Variation.Coords.Select(coords =>
             {
@@ -67,15 +74,15 @@ namespace PentominoesLib
                 excludeIndices.Contains(index)
                     ? Enumerable.Empty<int>()
                     : Enumerable.Repeat(locationIndices.Contains(index) ? 1 : 0, 1)
-            );
+            ).ToImmutableArray();
         }
 
-        private static IEnumerable<IEnumerable<int>> BuildMatrix(IEnumerable<Placement> rows) =>
+        private static ImmutableArray<ImmutableArray<int>> BuildMatrix(ImmutableArray<Placement> rows) =>
             rows.Select(placement =>
             {
                 var pieceColumns = MakePieceColumns(placement);
                 var locationColumns = MakeLocationColumns(placement);
-                return pieceColumns.Concat(locationColumns);
-            });
+                return pieceColumns.AddRange(locationColumns);
+            }).ToImmutableArray();
     }
 }

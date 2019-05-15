@@ -12,11 +12,11 @@ namespace PentominoesApp
         static void Main(string[] args)
         {
             var solutions = Pentominoes.Solve(OnSolutionFound);
-            Console.WriteLine($"Total number of solutions found: {solutions.Count()}");
-            Console.WriteLine($"Number of unique solutions found: {UniqueSolutions.Count()}");
+            Console.WriteLine($"Total number of solutions found: {solutions.Length}");
+            Console.WriteLine($"Number of unique solutions found: {UniqueSolutions.Count}");
         }
 
-        private static void OnSolutionFound(IEnumerable<Placement> rows, Solution solution, int solutionIndex)
+        private static void OnSolutionFound(ImmutableArray<Placement> rows, Solution solution, int solutionIndex)
         {
             if (IsSolutionUnique(rows, solution))
             {
@@ -30,7 +30,7 @@ namespace PentominoesApp
         private static List<Solution> UniqueSolutions = new List<Solution>();
         private static List<string> UniqueJoinedBoards = new List<string>();
 
-        private static bool IsSolutionUnique(IEnumerable<Placement> rows, Solution solution)
+        private static bool IsSolutionUnique(ImmutableArray<Placement> rows, Solution solution)
         {
             var board1 = FormatBoard(rows, solution);
             var board2 = StringManipulations.RotateStrings(board1);
@@ -53,7 +53,7 @@ namespace PentominoesApp
             return UniqueJoinedBoards.Intersect(joinedBoards).Count() == 0;
         }
 
-        private static void DrawSolution(IEnumerable<string> board)
+        private static void DrawSolution(ImmutableArray<string> board)
         {
             foreach (var line in board)
             {
@@ -62,10 +62,9 @@ namespace PentominoesApp
             Console.WriteLine(new string('-', 80));
         }
 
-        private static IEnumerable<string> FormatBoard(IEnumerable<Placement> rows, Solution solution)
+        private static ImmutableArray<string> FormatBoard(ImmutableArray<Placement> rows, Solution solution)
         {
-            var rowsArray = rows.ToImmutableArray();
-            var seed = ImmutableArray.Create<(int x, int y, string label)>(
+            var seed = ImmutableList.Create<(int x, int y, string label)>(
                 (3, 3, " "),
                 (3, 4, " "),
                 (4, 3, " "),
@@ -73,7 +72,7 @@ namespace PentominoesApp
             );
             var cells = solution.RowIndexes.Aggregate(seed, (accOuter, rowIndex) =>
             {
-                var placement = rowsArray[rowIndex];
+                var placement = rows[rowIndex];
                 return placement.Variation.Coords.Aggregate(accOuter, (accInner, coords) =>
                 {
                     var x = placement.Location.X + coords.X;
@@ -81,10 +80,11 @@ namespace PentominoesApp
                     return accInner.Add((x, y, placement.Piece.Label));
                 });
             });
-            return
+            var lines =
                 from y in Enumerable.Range(0, 8)
                 let row = Enumerable.Range(0, 8).Select(x => cells.First(t => t.x == x && t.y == y))
                 select string.Join("", row.Select(t => t.label));
+            return lines.ToImmutableArray();
         }
     }
 }

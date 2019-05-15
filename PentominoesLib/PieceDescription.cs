@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace PentominoesLib
 {
     public class PieceDescription
     {
-        public PieceDescription(string label, IEnumerable<string> pattern)
+        public PieceDescription(string label, ImmutableArray<string> pattern)
         {
             Label = label;
             Pattern = pattern;
         }
 
         public readonly string Label;
-        public readonly IEnumerable<string> Pattern;
+        public readonly ImmutableArray<string> Pattern;
     }
 }

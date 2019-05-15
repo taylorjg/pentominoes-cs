@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Xunit;
 using PentominoesLib;
 
@@ -11,7 +10,7 @@ namespace PentominoesTests
         public void FindsCorrectNumberOfSolutions()
         {
             var solutions = Pentominoes.Solve(null);
-            Assert.Equal(520, solutions.Count());
+            Assert.Equal(520, solutions.Length);
         }
     }
 }

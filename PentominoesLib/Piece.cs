@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace PentominoesLib
 {
     public class Piece
     {
-        public Piece(string label, IEnumerable<Variation> variations)
+        public Piece(string label, ImmutableArray<Variation> variations)
         {
             Label = label;
             Variations = variations;
         }
 
         public readonly string Label;
-        public readonly IEnumerable<Variation> Variations;
+        public readonly ImmutableArray<Variation> Variations;
     }
 }
