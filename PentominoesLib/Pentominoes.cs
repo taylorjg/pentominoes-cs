@@ -12,13 +12,10 @@ namespace PentominoesLib
             var rows = BuildRows;
             var matrix = BuildMatrix(rows);
             var dlx = new Dlx();
-            dlx.SolutionFound += (_, e) =>
+            if (onSolutionFound != null)
             {
-                if (onSolutionFound != null)
-                {
-                    onSolutionFound(rows, e.Solution, e.SolutionIndex);
-                }
-            };
+                dlx.SolutionFound += (_, e) => onSolutionFound(rows, e.Solution, e.SolutionIndex);
+            }
             var solutions = dlx.Solve(matrix, d => d, r => r);
             return solutions.ToImmutableArray();
         }

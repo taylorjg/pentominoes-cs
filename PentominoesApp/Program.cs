@@ -18,7 +18,7 @@ namespace PentominoesApp
 
         private static void OnSolutionFound(ImmutableArray<Placement> rows, Solution solution, int solutionIndex)
         {
-            if (IsSolutionUnique(rows, solution))
+            if (SolutionIsUnique(rows, solution))
             {
                 UniqueSolutions.Add(solution);
                 var board = FormatBoard(rows, solution);
@@ -30,7 +30,7 @@ namespace PentominoesApp
         private static List<Solution> UniqueSolutions = new List<Solution>();
         private static List<string> UniqueJoinedBoards = new List<string>();
 
-        private static bool IsSolutionUnique(ImmutableArray<Placement> rows, Solution solution)
+        private static bool SolutionIsUnique(ImmutableArray<Placement> rows, Solution solution)
         {
             var board1 = FormatBoard(rows, solution);
             var board2 = StringManipulations.RotateStrings(board1);
