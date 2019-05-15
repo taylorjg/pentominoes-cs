@@ -7,17 +7,22 @@ namespace PentominoesLib
 {
     public static class Pentominoes
     {
-        public static ImmutableArray<Solution> Solve(Action<ImmutableArray<Placement>, Solution, int> onSolutionFound)
+        public static ImmutableArray<ImmutableArray<Placement>> Solve(Action<ImmutableArray<Placement>> onSolutionFound)
         {
             var rows = BuildRows;
             var matrix = BuildMatrix(rows);
             var dlx = new Dlx();
             if (onSolutionFound != null)
             {
-                dlx.SolutionFound += (_, e) => onSolutionFound(rows, e.Solution, e.SolutionIndex);
+                dlx.SolutionFound += (_, e) => onSolutionFound(ResolveSolution(rows, e.Solution));
             }
-            var solutions = dlx.Solve(matrix, d => d, r => r);
+            var solutions = dlx.Solve(matrix, d => d, r => r).Select(solution => ResolveSolution(rows, solution));
             return solutions.ToImmutableArray();
+        }
+
+        private static ImmutableArray<Placement> ResolveSolution(ImmutableArray<Placement> rows, Solution solution)
+        {
+            return solution.RowIndexes.Select(rowIndex => rows[rowIndex]).ToImmutableArray();
         }
 
         private static bool PlacementIsValid(Placement placement)
