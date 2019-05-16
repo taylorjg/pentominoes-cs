@@ -40,7 +40,7 @@ namespace PentominoesLib
             var dlx = new Dlx();
             var allSolutions = dlx.Solve(matrix, d => d, r => r);
             return allSolutions
-                .Select(solution => ResolveSolution(rows, solution))
+                .Select(ResolveSolution(rows))
                 .Scan(
                     new State(),
                     (acc, solution) =>
@@ -78,10 +78,10 @@ namespace PentominoesLib
             return string.Join("|", FormatSolution(placements));
         }
 
-        private static ImmutableArray<Placement> ResolveSolution(ImmutableArray<Placement> rows, Solution solution)
-        {
-            return solution.RowIndexes.Select(rowIndex => rows[rowIndex]).ToImmutableArray();
-        }
+        private static Func<ImmutableArray<Placement>, Func<Solution, ImmutableArray<Placement>>> ResolveSolution =
+            rows =>
+                solution =>
+                    solution.RowIndexes.Select(rowIndex => rows[rowIndex]).ToImmutableArray();
 
         private static bool PlacementIsValid(Placement placement)
         {
