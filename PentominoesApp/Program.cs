@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Immutable;
 using PentominoesLib;
 
@@ -11,11 +12,12 @@ namespace PentominoesApp
         static void Main(string[] args)
         {
             var solutions = Pentominoes.Solve();
-            foreach (var solution in solutions)
+            var solutionsCount = solutions.Aggregate(0, (acc, solution) =>
             {
                 DrawSolution(solution);
-            }
-            Console.WriteLine($"Number of solutions found: {solutions.Length}");
+                return acc + 1;
+            });
+            Console.WriteLine($"Number of solutions found: {solutionsCount}");
         }
 
         private static void DrawSolution(Solution solution)

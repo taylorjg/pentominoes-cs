@@ -3,37 +3,52 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using DlxLib;
+using MoreLinq;
 
 namespace PentominoesLib
 {
     public static class Pentominoes
     {
-        public static ImmutableArray<ImmutableArray<Placement>> Solve()
+        class State
+        {
+            public State()
+            {
+                MaybeSolution = null;
+                UniqueBoards = ImmutableList.Create<string>();
+            }
+
+            public State(ImmutableList<string> uniqueBoards)
+            {
+                MaybeSolution = null;
+                UniqueBoards = uniqueBoards;
+            }
+
+            public State(ImmutableArray<Placement> solution, ImmutableList<string> uniqueBoards)
+            {
+                MaybeSolution = solution;
+                UniqueBoards = uniqueBoards;
+            }
+
+            public readonly ImmutableArray<Placement>? MaybeSolution;
+            public readonly ImmutableList<string> UniqueBoards;
+        }
+
+        public static IEnumerable<ImmutableArray<Placement>> Solve()
         {
             var rows = BuildRows;
             var matrix = BuildMatrix(rows);
             var dlx = new Dlx();
             var allSolutions = dlx.Solve(matrix, d => d, r => r);
-
-            var seed = new
-            {
-                UniqueSolutions = ImmutableList.Create<ImmutableArray<Placement>>(),
-                UniqueBoards = ImmutableList.Create<string>()
-            };
-
             return allSolutions
                 .Select(solution => ResolveSolution(rows, solution))
-                .Aggregate(
-                    seed,
-                    (acc, placements) =>
-                    SolutionDeDuplicator.SolutionIsUnique(placements, acc.UniqueBoards)
-                        ? new
-                        {
-                            UniqueSolutions = acc.UniqueSolutions.Add(placements),
-                            UniqueBoards = acc.UniqueBoards.Add(FormatBoardOneLine(placements))
-                        }
-                        : acc,
-                    acc => acc.UniqueSolutions.ToImmutableArray());
+                .Scan(
+                    new State(),
+                    (acc, solution) =>
+                        SolutionDeDuplicator.SolutionIsUnique(solution, acc.UniqueBoards)
+                            ? new State(solution, acc.UniqueBoards.Add(FormatBoardOneLine(solution)))
+                            : new State(acc.UniqueBoards.Add(FormatBoardOneLine(solution))))
+                .Where(acc => acc.MaybeSolution.HasValue)
+                .Select(acc => acc.MaybeSolution.Value);
         }
 
         public static ImmutableArray<string> FormatSolution(ImmutableArray<Placement> solution)
