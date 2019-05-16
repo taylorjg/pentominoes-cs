@@ -10,19 +10,28 @@ namespace PentominoesLib
     {
         public static ImmutableArray<ImmutableArray<Placement>> Solve()
         {
-            var solutionDeDuplicator = new SolutionDeDuplicator();
             var rows = BuildRows;
             var matrix = BuildMatrix(rows);
             var dlx = new Dlx();
-            foreach (var solution in dlx.Solve(matrix, d => d, r => r))
+            var allSolutions = dlx.Solve(matrix, d => d, r => r);
+
+            var seed = new
             {
-                var placements = ResolveSolution(rows, solution);
-                if (solutionDeDuplicator.SolutionIsUnique(placements))
-                {
-                    solutionDeDuplicator.Add(placements);
-                }
-            }
-            return solutionDeDuplicator.GetUniqueSolutions();
+                UniqueSolutions = ImmutableList.Create<ImmutableArray<Placement>>(),
+                UniqueBoards = ImmutableList.Create<string>()
+            };
+
+            var finalAcc = allSolutions
+                .Select(solution => ResolveSolution(rows, solution))
+                .Aggregate(seed, (acc, placements) =>
+                    SolutionDeDuplicator.SolutionIsUnique(placements, acc.UniqueBoards)
+                        ? new
+                        {
+                            UniqueSolutions = acc.UniqueSolutions.Add(placements),
+                            UniqueBoards = acc.UniqueBoards.Add(FormatBoardOneLine(placements))
+                        }
+                        : acc);
+            return finalAcc.UniqueSolutions.ToImmutableArray();
         }
 
         public static ImmutableArray<string> FormatSolution(ImmutableArray<Placement> solution)
@@ -45,6 +54,11 @@ namespace PentominoesLib
                 let row = Enumerable.Range(0, 8).Select(x => cells.First(t => t.x == x && t.y == y))
                 select string.Join("", row.Select(t => t.label));
             return lines.ToImmutableArray();
+        }
+
+        private static string FormatBoardOneLine(ImmutableArray<Placement> placements)
+        {
+            return string.Join("|", FormatSolution(placements));
         }
 
         private static ImmutableArray<Placement> ResolveSolution(ImmutableArray<Placement> rows, Solution solution)

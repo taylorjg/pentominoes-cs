@@ -6,9 +6,11 @@ using DlxLib;
 
 namespace PentominoesLib
 {
-    public class SolutionDeDuplicator
+    public static class SolutionDeDuplicator
     {
-        public bool SolutionIsUnique(ImmutableArray<Placement> placements)
+        public static bool SolutionIsUnique(
+            ImmutableArray<Placement> placements,
+            ImmutableList<string> uniqueBoards)
         {
             var board1 = Pentominoes.FormatSolution(placements);
             var board2 = StringManipulations.RotateStrings(board1);
@@ -28,22 +30,7 @@ namespace PentominoesLib
                 string.Join("|", board7),
                 string.Join("|", board8)
             };
-            return UniqueBoards.Intersect(boards).Count() == 0;
+            return uniqueBoards.Intersect(boards).Count() == 0;
         }
-
-
-        public void Add(ImmutableArray<Placement> placements)
-        {
-            var board = string.Join("|", Pentominoes.FormatSolution(placements));
-            UniqueSolutions.Add(placements);
-            UniqueBoards.Add(board);
-        }
-
-        public ImmutableArray<ImmutableArray<Placement>> GetUniqueSolutions() {
-            return UniqueSolutions.ToImmutableArray();
-        }
-
-        private List<ImmutableArray<Placement>> UniqueSolutions = new List<ImmutableArray<Placement>>();
-        private List<string> UniqueBoards = new List<string>();
     }
 }
