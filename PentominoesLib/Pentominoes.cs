@@ -21,17 +21,19 @@ namespace PentominoesLib
                 UniqueBoards = ImmutableList.Create<string>()
             };
 
-            var finalAcc = allSolutions
+            return allSolutions
                 .Select(solution => ResolveSolution(rows, solution))
-                .Aggregate(seed, (acc, placements) =>
+                .Aggregate(
+                    seed,
+                    (acc, placements) =>
                     SolutionDeDuplicator.SolutionIsUnique(placements, acc.UniqueBoards)
                         ? new
                         {
                             UniqueSolutions = acc.UniqueSolutions.Add(placements),
                             UniqueBoards = acc.UniqueBoards.Add(FormatBoardOneLine(placements))
                         }
-                        : acc);
-            return finalAcc.UniqueSolutions.ToImmutableArray();
+                        : acc,
+                    acc => acc.UniqueSolutions.ToImmutableArray());
         }
 
         public static ImmutableArray<string> FormatSolution(ImmutableArray<Placement> solution)
